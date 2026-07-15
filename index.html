@@ -115,6 +115,7 @@
     <div class="tool-badge"><b>ツールA</b> 店舗マスタ作成</div>
     <div class="tool-badge"><b>ツールA'</b> 記事フォーマット統一</div>
     <div class="tool-badge"><b>ツールB</b> 差分検知・履歴管理</div>
+    <div class="tool-badge"><b>Slack連携</b> 起動・通知</div>
   </div>
   <div class="meta">作成日: 2026-07-15　/　開発環境: Claude Code・Node.js・TypeScript・Playwright</div>
 </div>
@@ -128,6 +129,7 @@
       <a href="#flow">業務フロー</a>
       <a href="#overview">システム概要</a>
       <a href="#functions">機能一覧</a>
+      <a href="#slack">Slack連携</a>
       <a href="#nonfunc">非機能要件・制約</a>
       <a href="#risk">リスク</a>
     </div>
@@ -243,6 +245,15 @@ HPBを巡回 → 店舗マスタと差分検知
             </ul>
           </div>
           <div class="tool-card">
+            <h4>Slack連携 — 起動・通知</h4>
+            <ul>
+              <li>スラッシュコマンドで各ツールを起動</li>
+              <li>実行可能チャンネル/ユーザーを制限</li>
+              <li>対象CLIを子プロセスとして起動</li>
+              <li>実行結果・差分検知サマリをSlackへ通知</li>
+            </ul>
+          </div>
+          <div class="tool-card">
             <h4>共通基盤</h4>
             <ul>
               <li>Scraperクライアント（Playwright）</li>
@@ -262,14 +273,37 @@ HPBを巡回 → 店舗マスタと差分検知
           <tr><th>ツール</th><th>主な機能</th></tr>
           <tr><td>ツールA</td><td>入力受付／店舗名検索／基本情報取得／クーポン情報AI抽出／データ正規化／スプレッドシート書込／実行ログ出力</td></tr>
           <tr><td>ツールA'</td><td>対象記事取得／構造解析／店舗名寄せ(AI)／統一フォーマット生成／部分置換／ドライラン／WordPress更新／実行結果レポート</td></tr>
-          <tr><td>ツールB</td><td>定期巡回／差分比較／セル色付け／変更履歴記録／実行ログ記録／通知(将来拡張)</td></tr>
+          <tr><td>ツールB</td><td>定期巡回／差分比較／セル色付け／変更履歴記録／実行ログ記録／通知</td></tr>
+          <tr><td>Slack連携</td><td>スラッシュコマンド受付／パラメータ受付／即時応答／実行権限チェック／実行結果通知／差分検知通知／エラー通知</td></tr>
         </table>
+      </div>
+    </section>
+
+    <section id="slack">
+      <div class="card">
+        <h2><span class="num">06</span>Slack連携（起動・通知）</h2>
+        <p class="lead">Slack上のスラッシュコマンドで各ツールを起動し、結果を通知する</p>
+        <p>CLI手動実行に加えて、Slackのスラッシュコマンドから各ツールを起動できるようにします。担当者は普段使っているSlack上で操作でき、実行結果もそのままSlackで確認できます。</p>
+        <table>
+          <tr><th>機能</th><th>概要</th></tr>
+          <tr><td>スラッシュコマンド受付</td><td><code>/tool-a</code> <code>/tool-a-prime</code> <code>/tool-b</code> でツールを起動</td></tr>
+          <tr><td>即時応答</td><td>Slackの3秒応答制約に合わせ「実行を開始しました」と即座に応答し、本処理は非同期実行</td></tr>
+          <tr><td>実行権限チェック</td><td>許可されたチャンネル/ユーザーのみ実行可能（誤操作・悪用防止）</td></tr>
+          <tr><td>実行結果通知</td><td>成功/失敗/要確認件数のサマリをSlackチャンネルへ投稿</td></tr>
+          <tr><td>差分検知通知</td><td>ツールBが差分を検知した場合、変更店舗数・主な変更内容を要約して通知</td></tr>
+        </table>
+        <h3>起動フロー</h3>
+        <pre>Slackユーザー → /tool-b コマンド送信
+   → apps/slack-bot が権限チェック → 即時応答「実行を開始しました」
+   → ツールBを子プロセスとして非同期起動
+   → 完了後、結果サマリ(成功/失敗/差分件数)を chat.postMessage でSlackへ投稿</pre>
+        <div class="note"><b>可用性:</b> Slack連携はSocket Mode(常時接続・公開エンドポイント不要)で動作しますが、Bot停止中もCLI直接実行は可能な設計とし、Slackを唯一の起動経路にはしません。</div>
       </div>
     </section>
 
     <section id="nonfunc">
       <div class="card">
-        <h2><span class="num">06</span>非機能要件・制約事項</h2>
+        <h2><span class="num">07</span>非機能要件・制約事項</h2>
         <table>
           <tr><th>項目</th><th>内容</th></tr>
           <tr><td>実行環境</td><td>Windows / Node.js(LTS) / TypeScript / CLI実行</td></tr>
@@ -285,7 +319,7 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="risk">
       <div class="card">
-        <h2><span class="num">07</span>主なリスクと対応方針</h2>
+        <h2><span class="num">08</span>主なリスクと対応方針</h2>
         <table>
           <tr><th>リスク</th><th>影響度</th><th>対応方針</th></tr>
           <tr><td>HPBのHTML構造変更でスクレイピング失敗</td><td>高</td><td>セレクタを設定ファイル化し局所修正可能に。失敗は個別スキップし全体は継続</td></tr>
@@ -293,15 +327,23 @@ HPBを巡回 → 店舗マスタと差分検知
           <tr><td>LLMの誤判定(料金の読み違い等)</td><td>中</td><td>確信度(confidence)を付与し、低確信度は自動反映せず人手確認へ</td></tr>
           <tr><td>WordPress記事の誤更新</td><td>高</td><td>店舗情報部分に限定した置換ロジック＋ドライラン確認を必須化</td></tr>
           <tr><td>APIキー等の漏洩</td><td>高</td><td>専用シークレットフォルダで一元管理し、リポジトリ・ログに含めない</td></tr>
+          <tr><td>Slack経由の意図しない本番実行（誤操作・悪用）</td><td>高</td><td>実行可能チャンネル/ユーザーをホワイトリスト化。本番反映系コマンドは確認ステップを挟む</td></tr>
+          <tr><td>Slack Bot Token等の漏洩</td><td>高</td><td>シークレットフォルダで一元管理し、権限スコープを必要最小限に絞る</td></tr>
         </table>
       </div>
     </section>
 
     <section id="architecture">
       <div class="card">
-        <h2><span class="num">08</span>全体アーキテクチャ</h2>
-        <p>3ツールは共通基盤（<code>packages/core</code>）を参照するモノレポ構成のCLIツール群です。</p>
-        <pre>                ┌────────────────────────────┐
+        <h2><span class="num">09</span>全体アーキテクチャ</h2>
+        <p>3ツールは共通基盤（<code>packages/core</code>）を参照するモノレポ構成のCLIツール群です。Slack連携（<code>apps/slack-bot</code>）はこれらを呼び出す薄いフロントエンドとして追加します。</p>
+        <pre>[Slackワークスペース] → /tool-a 等コマンド
+        │ Socket Mode(常時待受)
+        ▼
+apps/slack-bot(Bolt) ── 権限チェック→起動→結果通知
+        │ 子プロセス起動
+        ▼
+                ┌────────────────────────────┐
                 │   共通基盤 (packages/core)   │
                 │  scraper / llm / sheets /   │
                 │  wordpress / logger / config│
@@ -327,7 +369,7 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="data">
       <div class="card">
-        <h2><span class="num">09</span>データ設計（Google Sheets）</h2>
+        <h2><span class="num">10</span>データ設計（Google Sheets）</h2>
         <p>1スプレッドシートに4シート構成。<b>店舗マスタ</b>を正本とし、<b>変更履歴</b>は追記のみで監査性を担保します。</p>
         <table>
           <tr><th>シート</th><th>用途</th><th>主なカラム例</th></tr>
@@ -341,13 +383,14 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="api">
       <div class="card">
-        <h2><span class="num">10</span>API設計</h2>
+        <h2><span class="num">11</span>API設計</h2>
         <table>
           <tr><th>API</th><th>用途</th><th>認証方式</th></tr>
           <tr><td>Google Sheets API</td><td>店舗マスタ・履歴・ログの読み書き、セル色付け</td><td>サービスアカウント(OAuth2)</td></tr>
           <tr><td>WordPress REST API</td><td>記事一覧・本文取得、店舗情報部分の更新</td><td>アプリケーションパスワード(Basic認証)</td></tr>
           <tr><td>Playwright</td><td>HPB店舗ページ・クーポンページの取得</td><td>－（公開ページの取得）</td></tr>
           <tr><td>Claude API</td><td>店舗情報抽出・記事構造解析・店舗名寄せ判定</td><td>APIキー(Bearer認証)</td></tr>
+          <tr><td>Slack API(Bolt/Socket Mode)</td><td>スラッシュコマンド受信、実行結果のメッセージ投稿</td><td>Bot Token + App-Level Token</td></tr>
         </table>
         <div class="note">全ての認証情報はプロジェクトフォルダ外の専用シークレットフォルダで管理し、リポジトリには <code>.env.example</code>（キー名のみ）を含めます。</div>
       </div>
@@ -355,7 +398,7 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="ai">
       <div class="card">
-        <h2><span class="num">11</span>AI設計</h2>
+        <h2><span class="num">12</span>AI設計</h2>
         <h3>LLM利用箇所</h3>
         <table>
           <tr><th>利用箇所</th><th>目的</th><th>出力</th></tr>
@@ -384,7 +427,7 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="html">
       <div class="card">
-        <h2><span class="num">12</span>HTML解析設計</h2>
+        <h2><span class="num">13</span>HTML解析設計</h2>
         <p>400記事に存在しうる店舗情報の構造パターンを4種類+非対応パターンに整理し、優先度順に判定します。</p>
         <table>
           <tr><th>パターン</th><th>特徴</th></tr>
@@ -400,7 +443,7 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="diff">
       <div class="card">
-        <h2><span class="num">13</span>差分検知設計</h2>
+        <h2><span class="num">14</span>差分検知設計</h2>
         <ul>
           <li>フィールド単位で比較し、全角半角等の表記揺れは正規化して吸収（誤検知防止）</li>
           <li>比較対象外: <code>store_id</code> / <code>hpb_url</code> / <code>review_count</code> / <code>rating</code>（頻繁に微変動するためノイズ防止）</li>
@@ -412,12 +455,13 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="test">
       <div class="card">
-        <h2><span class="num">14</span>テスト方針</h2>
-        <p>各ツールについて<b>正常系・異常系・境界値・API異常・取得失敗・タイムアウト</b>を網羅したテストケースを設計書に整理しています（合計31ケース）。</p>
+        <h2><span class="num">15</span>テスト方針</h2>
+        <p>各ツールについて<b>正常系・異常系・境界値・API異常・取得失敗・タイムアウト</b>を網羅したテストケースを設計書に整理しています（合計40ケース）。</p>
         <ul>
           <li>ツールA: 11ケース（新規登録・重複更新・クーポンなし店舗・URL不正・API異常 等）</li>
           <li>ツールA': 11ケース（table/タブ/div各パターン・ドライラン・要確認判定・更新競合 等）</li>
           <li>ツールB: 9ケース（差分検知・表記揺れ誤検知防止・閉店検知・API異常 等）</li>
+          <li>Slack連携: 9ケース（権限チェック・即時応答・結果通知・Socket Mode切断対応 等）</li>
         </ul>
         <p>詳細は <a href="./設計書.md#7-テスト仕様書">設計書.md 7章</a> を参照してください。</p>
       </div>
@@ -425,14 +469,15 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="wbs">
       <div class="card">
-        <h2><span class="num">15</span>開発タスク（WBS）</h2>
-        <p>共通基盤構築からツールA/A'/B実装、統合テスト、400記事への本番展開まで、全28タスクで<b>合計約31.0人日</b>を見積もっています。</p>
+        <h2><span class="num">16</span>開発タスク（WBS）</h2>
+        <p>共通基盤構築からツールA/A'/B実装、Slack連携、統合テスト、400記事への本番展開まで、全34タスクで<b>合計約37.5人日</b>を見積もっています。</p>
         <table>
           <tr><th>フェーズ</th><th>主なタスク</th><th>工数目安</th></tr>
           <tr><td>共通基盤</td><td>モノレポ構築、Sheets/WordPress/Playwright/LLMクライアント、Logger</td><td>約7.0人日</td></tr>
           <tr><td>ツールA</td><td>入力受付〜クーポンAI抽出〜マスタ書込〜テスト</td><td>約6.0人日</td></tr>
           <tr><td>ツールA'</td><td>構造解析〜名寄せ〜フォーマット生成〜検証〜テスト</td><td>約13.0人日</td></tr>
           <tr><td>ツールB</td><td>差分比較〜履歴書込〜定期実行設定〜テスト</td><td>約4.0人日</td></tr>
+          <tr><td>Slack連携</td><td>App作成、Bolt基盤構築、権限チェック、CLI連携、通知実装、テスト</td><td>約6.0人日</td></tr>
           <tr><td>全体統合・展開</td><td>統合テスト、セキュリティ確認、400記事本番展開</td><td>約5.5人日</td></tr>
         </table>
       </div>
@@ -440,13 +485,14 @@ HPBを巡回 → 店舗マスタと差分検知
 
     <section id="dir">
       <div class="card">
-        <h2><span class="num">16</span>ディレクトリ設計</h2>
+        <h2><span class="num">17</span>ディレクトリ設計</h2>
         <pre>eyebrow-salon-ai-tool/
 ├── packages/core/        # scraper / llm / sheets / wordpress / logger / config
 ├── apps/
 │   ├── tool-a/           # 店舗マスタ作成CLI
 │   ├── tool-a-prime/     # 記事フォーマット統一CLI
-│   └── tool-b/           # 差分検知CLI
+│   ├── tool-b/           # 差分検知CLI
+│   └── slack-bot/        # Slackスラッシュコマンド起動・結果通知
 ├── config/                # 既定値(機密情報は含まない)
 ├── logs/  reports/        # .gitignore対象
 ├── .env.example
