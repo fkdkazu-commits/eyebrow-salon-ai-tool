@@ -306,7 +306,7 @@
 店舗URL/店舗名一覧 → HPBを第一情報源としてAIが抽出
                     → 不足項目のみ公式HPで補完 → 店舗マスタに自動登録
 
-<span class="d-blue">■ 記事統一フォーマット化（ツールA'）</span>
+<span class="d-blue">■ 店舗情報自動反映（ツールA'、初回一括移行）</span>
 既存400記事を巡回 → AIが構造(table/タブ/div等)を解析
 → 店舗マスタの最新情報で統一フォーマットへ部分置換
 → WordPress REST APIで更新（紹介文は変更しない）
@@ -315,8 +315,10 @@
 HPB(または公式HP)を巡回 → 店舗マスタと差分検知
 → 差分セルを黄色にハイライト
 → 変更履歴シートに 日時/店舗/項目/旧値/新値 を記録
-→ Slackへ差分検知サマリを通知
-→ 担当者が確認し、必要に応じてツールA'で記事へ反映</div>
+→ Slackへ差分検知サマリを通知(反映ボタン付き)
+→ 担当者がSlack上で承認
+→ ツールA'が差分店舗のみを含む記事を検索し自動反映
+→ 変更履歴シートの reflected_to_articles を TRUE に更新</div>
       </div>
     </section>
 
@@ -335,7 +337,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
           <thead><tr><th>ツール</th><th>役割</th><th>起動方法</th></tr></thead>
           <tbody>
             <tr><td><strong>ツールA</strong></td><td>HPBを第一情報源として店舗情報を取得し、不足項目は公式HPで補完して店舗マスタを新規構築する</td><td>CLI / Slack</td></tr>
-            <tr><td><strong>ツールA'</strong></td><td>既存記事内の店舗情報表を、店舗マスタを参照して統一フォーマットへ置換する</td><td>CLI / Slack</td></tr>
+            <tr><td><strong>ツールA'</strong><br><span style="font-size:11px;color:var(--text-secondary);">店舗情報自動反映ツール</span></td><td>既存記事内の店舗情報表を統一フォーマットへ置換し、WordPress REST API経由で記事へ自動反映する。差分店舗のみを対象とした部分反映にも対応</td><td>CLI / Slack</td></tr>
             <tr><td><strong>ツールB</strong></td><td>HPB（または公式HP）を定期巡回し、店舗マスタとの差分を検知・記録する</td><td>スケジューラ / Slack</td></tr>
             <tr><td><strong>Slack連携</strong></td><td>スラッシュコマンドで各ツールを起動し、実行結果・差分検知内容を通知する</td><td>常時待受（Socket Mode）</td></tr>
           </tbody>
@@ -357,9 +359,9 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
           <thead><tr><th>ツール</th><th>主な機能</th></tr></thead>
           <tbody>
             <tr><td>ツールA</td><td>入力受付／店舗名検索／基本情報取得／クーポン情報AI抽出／<strong>公式HPフォールバック取得</strong>／データ正規化／スプレッドシート書込／実行ログ出力</td></tr>
-            <tr><td>ツールA'</td><td>対象記事取得／構造解析／店舗名寄せ(AI)／統一フォーマット生成／部分置換／ドライラン／WordPress更新／実行結果レポート</td></tr>
+            <tr><td>ツールA'</td><td>対象記事取得／構造解析／店舗名寄せ(AI)／統一フォーマット生成／部分置換／ドライラン／WordPress更新／実行結果レポート／<strong>差分店舗のみ反映モード</strong></td></tr>
             <tr><td>ツールB</td><td>定期巡回／差分比較／セル色付け／変更履歴記録／実行ログ記録／通知</td></tr>
-            <tr><td>Slack連携</td><td>スラッシュコマンド受付／即時応答／実行権限チェック／実行結果通知／差分検知通知／エラー通知</td></tr>
+            <tr><td>Slack連携</td><td>スラッシュコマンド受付／即時応答／実行権限チェック／実行結果通知／差分検知通知／エラー通知／<strong>差分反映の承認ボタン</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -436,16 +438,38 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
             <tr><td>実行権限チェック</td><td>許可されたチャンネル/ユーザーのみ実行可能（誤操作・悪用防止）</td></tr>
             <tr><td>実行結果通知</td><td>成功/失敗/要確認件数のサマリをSlackチャンネルへ投稿</td></tr>
             <tr><td>差分検知通知</td><td>ツールBが差分を検知した場合、変更店舗数・主な変更内容を要約して通知</td></tr>
+            <tr><td><strong>差分反映の承認ボタン</strong></td><td>差分検知通知に「反映する」ボタンを付与し、担当者のクリックでツールA'を差分店舗のみ対象に起動</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="card">
-        <h3>起動フロー</h3>
+        <h3>起動フロー（コマンド実行）</h3>
         <div class="diagram">Slackユーザー → /tool-b コマンド送信
    → apps/slack-bot が権限チェック → 即時応答「実行を開始しました」
    → ツールBを子プロセスとして非同期起動
    → 完了後、結果サマリ(成功/失敗/差分件数)を chat.postMessage でSlackへ投稿</div>
+      </div>
+
+      <div class="card">
+        <h3>差分検知 → Slack承認 → 記事への自動反映フロー</h3>
+        <p>ツールBが差分を検知した後、担当者がSlack上で内容を確認し承認した店舗のみ、ツールA'が記事へ自動反映します。全記事を再スキャンするのではなく、<strong>差分があった店舗を含む記事のみ</strong>を対象にするため高速です。</p>
+        <div class="diagram">ツールB: 差分検知（例：店舗Xの営業時間が変更）
+   → 変更履歴シートに記録
+   → Slackへ通知（「反映する」ボタン付き）
+   → 担当者がボタンをクリックして承認
+   → apps/slack-bot が ツールA' を store_id=X 指定で起動
+      （<span class="ic">&lt;!-- shop-info-block:store_id=X --&gt;</span> の目印コメントで対象記事を検索）
+   → WordPress REST APIで該当ブロックのみ更新
+   → 変更履歴シートの reflected_to_articles を TRUE に更新
+   → 完了をSlackへ返信</div>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div>WordPressへの実更新を伴うため、<strong>担当者の承認を必須</strong>とし完全自動化はしません。承認可能なチャンネル/ユーザーは実行権限チェックの対象です。</div>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="callout ok">
           <span class="callout-icon">✅</span>
           <div><strong>可用性:</strong> Slack連携はSocket Mode（常時接続・公開エンドポイント不要）で動作しますが、Bot停止中もCLI直接実行は可能な設計とし、Slackを唯一の起動経路にはしません。</div>
@@ -746,7 +770,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
 ├── packages/core/        # scraper / llm / sheets / wordpress / logger / config
 ├── apps/
 │   ├── tool-a/           # 店舗マスタ作成CLI（公式HPフォールバック含む）
-│   ├── tool-a-prime/     # 記事フォーマット統一CLI
+│   ├── tool-a-prime/     # 店舗情報自動反映CLI
 │   ├── tool-b/           # 差分検知CLI
 │   └── slack-bot/        # Slackスラッシュコマンド起動・結果通知
 ├── config/                # 既定値(機密情報は含まない)
