@@ -203,8 +203,7 @@
 
     <div class="nav-group">品質・計画</div>
     <a class="nav-item" href="#test"><span class="nav-badge">16</span> テスト方針</a>
-    <a class="nav-item" href="#wbs"><span class="nav-badge">17</span> 開発タスク(WBS)</a>
-    <a class="nav-item" href="#dir"><span class="nav-badge">18</span> ディレクトリ設計</a>
+    <a class="nav-item" href="#dir"><span class="nav-badge">17</span> ディレクトリ設計</a>
 
     <div class="nav-group">よくある質問</div>
     <a class="nav-item" href="#faq"><span class="nav-badge">?</span> Q&A</a>
@@ -590,7 +589,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
             <tr><td>Google Sheets API</td><td>店舗マスタ・履歴・ログの読み書き、セル色付け</td><td>サービスアカウント(OAuth2)</td></tr>
             <tr><td>WordPress REST API</td><td>記事一覧・本文取得、店舗情報部分の更新</td><td>アプリケーションパスワード(Basic認証)</td></tr>
             <tr><td>Playwright</td><td>HPB店舗ページ・クーポンページ・公式HPの取得</td><td>－（公開ページの取得）</td></tr>
-            <tr><td>Claude API</td><td>店舗情報抽出・公式HP補完抽出・記事構造解析・店舗名寄せ判定</td><td>APIキー(Bearer認証)</td></tr>
+            <tr><td>Claude Code CLI</td><td>店舗情報抽出・公式HP補完抽出・記事構造解析・店舗名寄せ判定</td><td>既存のClaudeサブスクリプション（従量課金APIキー不使用）</td></tr>
             <tr><td>Slack API(Bolt/Socket Mode)</td><td>スラッシュコマンド受信、実行結果のメッセージ投稿</td><td>Bot Token + App-Level Token</td></tr>
           </tbody>
         </table>
@@ -731,35 +730,10 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
       </div>
     </section>
 
-    <!-- ═══ WBS ═══ -->
-    <section class="section" id="wbs">
-      <div class="section-header">
-        <div class="step-circle">17</div>
-        <div>
-          <h2>開発タスク（WBS）</h2>
-          <div class="sub">合計約40.0人日</div>
-        </div>
-      </div>
-      <div class="card">
-        <p>共通基盤構築からツールA/A'/B実装、公式HPフォールバック、Slack連携、統合テスト、400記事への本番展開まで、全36タスクで<strong>合計約40.0人日</strong>を見積もっています。</p>
-        <table class="tbl">
-          <thead><tr><th>フェーズ</th><th>主なタスク</th><th>工数目安</th></tr></thead>
-          <tbody>
-            <tr><td>共通基盤</td><td>モノレポ構築、Sheets/WordPress/Playwright/LLMクライアント、Logger</td><td>約7.0人日</td></tr>
-            <tr><td>ツールA</td><td>入力受付〜クーポンAI抽出〜<strong>公式HPフォールバック</strong>〜マスタ書込〜テスト</td><td>約8.5人日</td></tr>
-            <tr><td>ツールA'</td><td>構造解析〜名寄せ〜フォーマット生成〜検証〜テスト</td><td>約13.0人日</td></tr>
-            <tr><td>ツールB</td><td>差分比較〜履歴書込〜定期実行設定〜テスト</td><td>約4.0人日</td></tr>
-            <tr><td>Slack連携</td><td>App作成、Bolt基盤構築、権限チェック、CLI連携、通知実装、テスト</td><td>約6.0人日</td></tr>
-            <tr><td>全体統合・展開</td><td>統合テスト、セキュリティ確認、400記事本番展開</td><td>約5.5人日</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
     <!-- ═══ ディレクトリ設計 ═══ -->
     <section class="section" id="dir">
       <div class="section-header">
-        <div class="step-circle">18</div>
+        <div class="step-circle">17</div>
         <div>
           <h2>ディレクトリ設計</h2>
           <div class="sub">モノレポ構成</div>
