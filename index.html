@@ -187,23 +187,22 @@
     <a class="nav-item" href="#overview"><span class="nav-badge">4</span> システム概要</a>
     <a class="nav-item" href="#functions"><span class="nav-badge">5</span> 機能一覧</a>
     <a class="nav-item" href="#datasource"><span class="nav-badge">6</span> 情報源の優先順位</a>
-    <a class="nav-item" href="#slack"><span class="nav-badge">7</span> Slack連携</a>
 
     <div class="nav-group">要件</div>
-    <a class="nav-item" href="#nonfunc"><span class="nav-badge">8</span> 非機能要件・制約</a>
-    <a class="nav-item" href="#risk"><span class="nav-badge">9</span> リスク</a>
+    <a class="nav-item" href="#nonfunc"><span class="nav-badge">7</span> 非機能要件・制約</a>
+    <a class="nav-item" href="#risk"><span class="nav-badge">8</span> リスク</a>
 
     <div class="nav-group">設計</div>
-    <a class="nav-item" href="#architecture"><span class="nav-badge">10</span> 全体アーキテクチャ</a>
-    <a class="nav-item" href="#data"><span class="nav-badge">11</span> データ設計</a>
-    <a class="nav-item" href="#api"><span class="nav-badge">12</span> API設計</a>
-    <a class="nav-item" href="#ai"><span class="nav-badge">13</span> AI設計</a>
-    <a class="nav-item" href="#html"><span class="nav-badge">14</span> HTML解析設計</a>
-    <a class="nav-item" href="#diff"><span class="nav-badge">15</span> 差分検知設計</a>
+    <a class="nav-item" href="#architecture"><span class="nav-badge">9</span> 全体アーキテクチャ</a>
+    <a class="nav-item" href="#data"><span class="nav-badge">10</span> データ設計</a>
+    <a class="nav-item" href="#api"><span class="nav-badge">11</span> API設計</a>
+    <a class="nav-item" href="#ai"><span class="nav-badge">12</span> AI設計</a>
+    <a class="nav-item" href="#html"><span class="nav-badge">13</span> HTML解析設計</a>
+    <a class="nav-item" href="#diff"><span class="nav-badge">14</span> 差分検知設計</a>
 
     <div class="nav-group">品質・計画</div>
-    <a class="nav-item" href="#test"><span class="nav-badge">16</span> テスト方針</a>
-    <a class="nav-item" href="#dir"><span class="nav-badge">17</span> ディレクトリ設計</a>
+    <a class="nav-item" href="#test"><span class="nav-badge">15</span> テスト方針</a>
+    <a class="nav-item" href="#dir"><span class="nav-badge">16</span> ディレクトリ設計</a>
 
     <div class="nav-group">よくある質問</div>
     <a class="nav-item" href="#faq"><span class="nav-badge">?</span> Q&A</a>
@@ -222,7 +221,7 @@
     <div class="page-header-label">Requirements &amp; Design Doc — Eyebrow Salon Comparison Media</div>
     <h1>眉毛サロン比較メディア<br>店舗情報AI自動更新システム</h1>
     <div class="page-header-desc">
-      400記事以上に散在する店舗情報を、ホットペッパービューティーを第一情報源としてAIで自動収集・統一フォーマット化・差分検知するための3ツール＋Slack連携の要件定義・設計資料です。
+      400記事以上に散在する店舗情報を、ホットペッパービューティーを第一情報源としてAIで自動収集・統一フォーマット化・差分検知するための3ツールの要件定義・設計資料です。
     </div>
   </div>
 
@@ -311,12 +310,12 @@
 → 店舗マスタの最新情報で統一フォーマットへ部分置換
 → WordPress REST APIで更新（紹介文は変更しない）
 
-<span class="d-green">■ 定常運用（ツールB・定期実行 + Slackからの随時実行）</span>
+<span class="d-green">■ 定常運用（ツールB・定期実行）</span>
 HPB(または公式HP)を巡回 → 店舗マスタと差分検知
 → 差分セルを黄色にハイライト
-→ 変更履歴シートに 日時/店舗/項目/旧値/新値 を記録
-→ Slackへ差分検知サマリを通知(反映ボタン付き)
-→ 担当者がSlack上で承認
+→ 変更履歴シートに 日時/店舗/項目/旧値/新値 を記録(approved列は初期値FALSE)
+→ 担当者が内容を確認し、変更履歴シートのapproved列をTRUEに変更(承認)
+→ 次回のツールB定期実行時にapproved=TRUEの行を自動検出
 → ツールA'が差分店舗のみを含む記事を検索し自動反映
 → 変更履歴シートの reflected_to_articles を TRUE に更新</div>
       </div>
@@ -328,18 +327,17 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
         <div class="step-circle">4</div>
         <div>
           <h2>システム概要</h2>
-          <div class="sub">3つのCLIツール + Slack連携</div>
+          <div class="sub">3つのCLIツール</div>
         </div>
       </div>
       <div class="card">
-        <p>Claude Code（Node.js / TypeScript）で開発する、独立した3つのCLIツールとSlack連携で構成します。共通のスクレイピング基盤（Playwright）・LLM抽出基盤・Google Sheets連携基盤を共有ライブラリとして再利用します。</p>
+        <p>Claude Code（Node.js / TypeScript）で開発する、独立した3つのCLIツールで構成します。共通のスクレイピング基盤（Playwright）・LLM抽出基盤・Google Sheets連携基盤を共有ライブラリとして再利用します。</p>
         <table class="tbl">
           <thead><tr><th>ツール</th><th>役割</th><th>起動方法</th></tr></thead>
           <tbody>
-            <tr><td><strong>ツールA</strong></td><td>HPBを第一情報源として店舗情報を取得し、不足項目は公式HPで補完して店舗マスタを新規構築する</td><td>CLI / Slack</td></tr>
-            <tr><td><strong>ツールA'</strong><br><span style="font-size:11px;color:var(--text-secondary);">店舗情報自動反映ツール</span></td><td>既存記事内の店舗情報表を統一フォーマットへ置換し、WordPress REST API経由で記事へ自動反映する。差分店舗のみを対象とした部分反映にも対応</td><td>CLI / Slack</td></tr>
-            <tr><td><strong>ツールB</strong></td><td>HPB（または公式HP）を定期巡回し、店舗マスタとの差分を検知・記録する</td><td>スケジューラ / Slack</td></tr>
-            <tr><td><strong>Slack連携</strong></td><td>スラッシュコマンドで各ツールを起動し、実行結果・差分検知内容を通知する</td><td>常時待受（Socket Mode）</td></tr>
+            <tr><td><strong>ツールA</strong></td><td>HPBを第一情報源として店舗情報を取得し、不足項目は公式HPで補完して店舗マスタを新規構築する</td><td>CLI手動実行</td></tr>
+            <tr><td><strong>ツールA'</strong><br><span style="font-size:11px;color:var(--text-secondary);">店舗情報自動反映ツール</span></td><td>既存記事内の店舗情報表を統一フォーマットへ置換し、WordPress REST API経由で記事へ自動反映する。差分店舗のみを対象とした部分反映にも対応</td><td>CLI手動実行（承認済み差分はツールBから自動起動）</td></tr>
+            <tr><td><strong>ツールB</strong></td><td>HPB（または公式HP）を定期巡回し、店舗マスタとの差分を検知・記録する。承認済み（approved=TRUE）の差分があればツールA'を自動起動し記事へ反映する</td><td>スケジューラによる自動実行</td></tr>
           </tbody>
         </table>
       </div>
@@ -360,8 +358,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
           <tbody>
             <tr><td>ツールA</td><td>入力受付／店舗名検索／基本情報取得／クーポン情報AI抽出／<strong>公式HPフォールバック取得</strong>／データ正規化／スプレッドシート書込／実行ログ出力</td></tr>
             <tr><td>ツールA'</td><td>対象記事取得／構造解析／店舗名寄せ(AI)／統一フォーマット生成／部分置換／ドライラン／WordPress更新／実行結果レポート／<strong>差分店舗のみ反映モード</strong></td></tr>
-            <tr><td>ツールB</td><td>定期巡回／差分比較／セル色付け／変更履歴記録／実行ログ記録／通知</td></tr>
-            <tr><td>Slack連携</td><td>スラッシュコマンド受付／即時応答／実行権限チェック／実行結果通知／差分検知通知／エラー通知／<strong>差分反映の承認ボタン</strong></td></tr>
+            <tr><td>ツールB</td><td>定期巡回／差分比較／セル色付け／変更履歴記録／実行ログ記録／<strong>承認済み差分の自動反映（ツールA'呼び出し）</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -418,69 +415,10 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
       </div>
     </section>
 
-    <!-- ═══ Slack連携 ═══ -->
-    <section class="section" id="slack">
-      <div class="section-header">
-        <div class="step-circle" style="background:#16a34a;">7</div>
-        <div>
-          <h2>Slack連携（起動・通知）</h2>
-          <div class="sub">Slack上のスラッシュコマンドで各ツールを起動し、結果を通知する</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <p>CLI手動実行に加えて、Slackのスラッシュコマンドから各ツールを起動できるようにします。担当者は普段使っているSlack上で操作でき、実行結果もそのままSlackで確認できます。</p>
-        <table class="tbl">
-          <thead><tr><th>機能</th><th>概要</th></tr></thead>
-          <tbody>
-            <tr><td>スラッシュコマンド受付</td><td><span class="ic">/tool-a</span> <span class="ic">/tool-a-prime</span> <span class="ic">/tool-b</span> でツールを起動</td></tr>
-            <tr><td>即時応答</td><td>Slackの3秒応答制約に合わせ「実行を開始しました」と即座に応答し、本処理は非同期実行</td></tr>
-            <tr><td>実行権限チェック</td><td>許可されたチャンネル/ユーザーのみ実行可能（誤操作・悪用防止）</td></tr>
-            <tr><td>実行結果通知</td><td>成功/失敗/要確認件数のサマリをSlackチャンネルへ投稿</td></tr>
-            <tr><td>差分検知通知</td><td>ツールBが差分を検知した場合、変更店舗数・主な変更内容を要約して通知</td></tr>
-            <tr><td><strong>差分反映の承認ボタン</strong></td><td>差分検知通知に「反映する」ボタンを付与し、担当者のクリックでツールA'を差分店舗のみ対象に起動</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>起動フロー（コマンド実行）</h3>
-        <div class="diagram">Slackユーザー → /tool-b コマンド送信
-   → apps/slack-bot が権限チェック → 即時応答「実行を開始しました」
-   → ツールBを子プロセスとして非同期起動
-   → 完了後、結果サマリ(成功/失敗/差分件数)を chat.postMessage でSlackへ投稿</div>
-      </div>
-
-      <div class="card">
-        <h3>差分検知 → Slack承認 → 記事への自動反映フロー</h3>
-        <p>ツールBが差分を検知した後、担当者がSlack上で内容を確認し承認した店舗のみ、ツールA'が記事へ自動反映します。全記事を再スキャンするのではなく、<strong>差分があった店舗を含む記事のみ</strong>を対象にするため高速です。</p>
-        <div class="diagram">ツールB: 差分検知（例：店舗Xの営業時間が変更）
-   → 変更履歴シートに記録
-   → Slackへ通知（「反映する」ボタン付き）
-   → 担当者がボタンをクリックして承認
-   → apps/slack-bot が ツールA' を store_id=X 指定で起動
-      （<span class="ic">&lt;!-- shop-info-block:store_id=X --&gt;</span> の目印コメントで対象記事を検索）
-   → WordPress REST APIで該当ブロックのみ更新
-   → 変更履歴シートの reflected_to_articles を TRUE に更新
-   → 完了をSlackへ返信</div>
-        <div class="callout warn">
-          <span class="callout-icon">⚠️</span>
-          <div>WordPressへの実更新を伴うため、<strong>担当者の承認を必須</strong>とし完全自動化はしません。承認可能なチャンネル/ユーザーは実行権限チェックの対象です。</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="callout ok">
-          <span class="callout-icon">✅</span>
-          <div><strong>可用性:</strong> Slack連携はSocket Mode（常時接続・公開エンドポイント不要）で動作しますが、Bot停止中もCLI直接実行は可能な設計とし、Slackを唯一の起動経路にはしません。</div>
-        </div>
-      </div>
-    </section>
-
     <!-- ═══ 非機能要件・制約 ═══ -->
     <section class="section" id="nonfunc">
       <div class="section-header">
-        <div class="step-circle">8</div>
+        <div class="step-circle">7</div>
         <div>
           <h2>非機能要件・制約事項</h2>
           <div class="sub">実行環境・セキュリティ・拡張性</div>
@@ -490,17 +428,17 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
         <table class="tbl">
           <thead><tr><th>項目</th><th>内容</th></tr></thead>
           <tbody>
-            <tr><td>実行環境</td><td>Windows / Node.js(LTS) / TypeScript / CLI実行 + Slackスラッシュコマンド</td></tr>
+            <tr><td>実行環境</td><td>Windows / Node.js(LTS) / TypeScript / CLI実行（ツールBはスケジューラによる自動実行）</td></tr>
             <tr><td>対象データ量</td><td>記事約400件、店舗数は数百規模</td></tr>
             <tr><td>スクレイピング耐性</td><td>HPB・公式HPのレイアウト変更・アクセス制限に対しリトライ・待機・UA設定で耐性確保</td></tr>
             <tr><td>データ整合性</td><td>Google Sheetsを唯一の正(Single Source of Truth)とし記事側は一方向反映</td></tr>
-            <tr><td>セキュリティ</td><td>APIキー・Slack Token等はプロジェクトフォルダ外の専用シークレットフォルダで管理</td></tr>
+            <tr><td>セキュリティ</td><td>APIキー等はプロジェクトフォルダ外の専用シークレットフォルダで管理</td></tr>
             <tr><td>拡張性</td><td>業種固有ロジックを設定・プロンプトに分離し、他業種メディアへ横展開可能な設計</td></tr>
           </tbody>
         </table>
         <div class="callout info">
           <span class="callout-icon">ℹ️</span>
-          <div><strong>制約:</strong> Playwright / Google Sheets API / WordPress REST API / Slack Bolt(Socket Mode) / Git の利用が必須。HPB・公式HPともに利用規約・robots.txtの範囲内でのアクセスに限定します。</div>
+          <div><strong>制約:</strong> Playwright / Google Sheets API / WordPress REST API / Git の利用が必須。HPB・公式HPともに利用規約・robots.txtの範囲内でのアクセスに限定します。</div>
         </div>
       </div>
     </section>
@@ -508,10 +446,10 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ リスク ═══ -->
     <section class="section" id="risk">
       <div class="section-header">
-        <div class="step-circle" style="background:#dc2626;">9</div>
+        <div class="step-circle" style="background:#dc2626;">8</div>
         <div>
           <h2>主なリスクと対応方針</h2>
-          <div class="sub">全11件を識別（うちSlack連携2件、公式HPフォールバック2件）</div>
+          <div class="sub">全10件を識別（うち公式HPフォールバック2件、承認方式変更1件）</div>
         </div>
       </div>
       <div class="card">
@@ -523,10 +461,9 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
             <tr><td>LLMの誤判定(料金の読み違い等)</td><td><span class="badge b-gray">中</span></td><td>確信度(confidence)を付与し、低確信度は自動反映せず人手確認へ</td></tr>
             <tr><td>WordPress記事の誤更新</td><td><span class="badge b-yellow">高</span></td><td>店舗情報部分に限定した置換ロジック＋ドライラン確認を必須化</td></tr>
             <tr><td>APIキー等の漏洩</td><td><span class="badge b-yellow">高</span></td><td>専用シークレットフォルダで一元管理し、リポジトリ・ログに含めない</td></tr>
-            <tr><td>Slack経由の意図しない本番実行</td><td><span class="badge b-yellow">高</span></td><td>実行可能チャンネル/ユーザーをホワイトリスト化。本番反映系コマンドは確認ステップを挟む</td></tr>
-            <tr><td>Slack Bot Token等の漏洩</td><td><span class="badge b-yellow">高</span></td><td>シークレットフォルダで一元管理し、権限スコープを必要最小限に絞る</td></tr>
             <tr><td>公式HPの構造が店舗ごとにバラバラで抽出困難</td><td><span class="badge b-gray">中</span></td><td>AIによる汎用抽出（キーワード近傍探索＋LLM判定）を使用。抽出不可時はnullのまま「要確認」</td></tr>
             <tr><td>HPBと公式HPで情報が食い違う</td><td><span class="badge b-gray">中</span></td><td>HPB優先の原則を機械的に適用し、公式HPの値で上書きしない</td></tr>
+            <tr><td>変更履歴シートのapproved列を誤ってTRUEにしてしまう</td><td><span class="badge b-gray">中</span></td><td>承認前に旧値/新値を必ず確認する運用とする。更新範囲は限定的でWordPressのリビジョン機能で復元可能</td></tr>
           </tbody>
         </table>
       </div>
@@ -535,21 +472,15 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ アーキテクチャ ═══ -->
     <section class="section" id="architecture">
       <div class="section-header">
-        <div class="step-circle">10</div>
+        <div class="step-circle">9</div>
         <div>
           <h2>全体アーキテクチャ</h2>
-          <div class="sub">共通基盤 + 3ツール + Slack連携</div>
+          <div class="sub">共通基盤 + 3ツール</div>
         </div>
       </div>
       <div class="card">
-        <p>3ツールは共通基盤（<span class="ic">packages/core</span>）を参照するモノレポ構成のCLIツール群です。Slack連携（<span class="ic">apps/slack-bot</span>）はこれらを呼び出す薄いフロントエンドとして追加します。</p>
-        <div class="diagram"><span class="d-blue">[Slackワークスペース]</span> → /tool-a 等コマンド
-        │ Socket Mode(常時待受)
-        ▼
-<span class="d-white">apps/slack-bot(Bolt)</span> ── 権限チェック→起動→結果通知
-        │ 子プロセス起動
-        ▼
-┌────────────────────────────┐
+        <p>3ツールは共通基盤（<span class="ic">packages/core</span>）を参照するモノレポ構成のCLIツール群です。ツールBは差分検知に加えて、承認済み（approved=TRUE）の差分を検出するとツールA'を子プロセスとして起動します。</p>
+        <div class="diagram">┌────────────────────────────┐
 │   共通基盤 (packages/core)   │
 │  scraper / llm / sheets /   │
 │  wordpress / logger / config│
@@ -557,23 +488,23 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
                │ 参照
    ┌────────────┼────────────┐
 ┌──▼───┐   ┌────▼────┐   ┌───▼──┐
-│ツールA│   │ツールA' │   │ツールB│
-└──┬───┘   └────┬────┘   └───┬──┘
+│ツールA│   │ツールA' │◀──│ツールB│
+└──┬───┘   └────┬────┘子プロセス起動└───┬──┘
    ▼             ▼            ▼
 <span class="d-dim">HPB/公式HP(Playwright)</span>  <span class="d-dim">WordPress REST API</span>  <span class="d-dim">HPB/公式HP(Playwright)</span>
    │                                        │
    └──────────────┐          ┌──────────────┘
                    ▼          ▼
           <span class="d-green">Google Sheets（店舗マスタ／変更履歴／ログ／設定）</span>
-                   │
-                   └──→ Slack Web API（chat.postMessage）で結果通知</div>
+                   ▲
+        担当者がapproved列をTRUEに変更（承認）</div>
       </div>
     </section>
 
     <!-- ═══ データ設計 ═══ -->
     <section class="section" id="data">
       <div class="section-header">
-        <div class="step-circle">11</div>
+        <div class="step-circle">10</div>
         <div>
           <h2>データ設計（Google Sheets）</h2>
           <div class="sub">4シート構成</div>
@@ -600,21 +531,20 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ API設計 ═══ -->
     <section class="section" id="api">
       <div class="section-header">
-        <div class="step-circle">12</div>
+        <div class="step-circle">11</div>
         <div>
           <h2>API設計</h2>
-          <div class="sub">Google Sheets / WordPress / Playwright / Claude / Slack</div>
+          <div class="sub">Google Sheets / WordPress / Playwright / Claude Code CLI</div>
         </div>
       </div>
       <div class="card">
         <table class="tbl">
           <thead><tr><th>API</th><th>用途</th><th>認証方式</th></tr></thead>
           <tbody>
-            <tr><td>Google Sheets API</td><td>店舗マスタ・履歴・ログの読み書き、セル色付け</td><td>サービスアカウント(OAuth2)</td></tr>
+            <tr><td>Google Sheets API</td><td>店舗マスタ・履歴・ログの読み書き、セル色付け、approved列の確認</td><td>サービスアカウント(OAuth2)</td></tr>
             <tr><td>WordPress REST API</td><td>記事一覧・本文取得、店舗情報部分の更新</td><td>アプリケーションパスワード(Basic認証)</td></tr>
             <tr><td>Playwright</td><td>HPB店舗ページ・クーポンページ・公式HPの取得</td><td>－（公開ページの取得）</td></tr>
             <tr><td>Claude Code CLI</td><td>店舗情報抽出・公式HP補完抽出・記事構造解析・店舗名寄せ判定</td><td>既存のClaudeサブスクリプション（従量課金APIキー不使用）</td></tr>
-            <tr><td>Slack API(Bolt/Socket Mode)</td><td>スラッシュコマンド受信、実行結果のメッセージ投稿</td><td>Bot Token + App-Level Token</td></tr>
           </tbody>
         </table>
         <div class="callout info">
@@ -627,7 +557,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ AI設計 ═══ -->
     <section class="section" id="ai">
       <div class="section-header">
-        <div class="step-circle" style="background:#7c3aed;">13</div>
+        <div class="step-circle" style="background:#7c3aed;">12</div>
         <div>
           <h2>AI設計</h2>
           <div class="sub">LLM利用箇所・プロンプト設計</div>
@@ -685,7 +615,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ HTML解析設計 ═══ -->
     <section class="section" id="html">
       <div class="section-header">
-        <div class="step-circle">14</div>
+        <div class="step-circle">13</div>
         <div>
           <h2>HTML解析設計</h2>
           <div class="sub">記事内の店舗情報ブロック特定パターン</div>
@@ -713,7 +643,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ 差分検知設計 ═══ -->
     <section class="section" id="diff">
       <div class="section-header">
-        <div class="step-circle">15</div>
+        <div class="step-circle">14</div>
         <div>
           <h2>差分検知設計</h2>
           <div class="sub">比較ロジック・色付けルール</div>
@@ -728,15 +658,32 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
           <li>差分は変更履歴シートへ<strong>追記のみ</strong>（削除・上書きしない＝監査性の担保）</li>
         </ul>
       </div>
+
+      <div class="card">
+        <h3>差分検知 → スプレッドシート承認 → 記事への自動反映フロー</h3>
+        <p>差分検知時点では自動反映しません。担当者が変更履歴シートを確認し、記事へ反映してよい行の<span class="ic">approved</span>列（チェックボックス）をTRUEにすることで承認します。実際の反映は次回以降のツールB定期実行時に自動的に行われるため、Bot常駐やチャットツール連携は不要です。</p>
+        <div class="diagram">ツールB: 差分検知（例：店舗Xの営業時間が変更）
+   → 変更履歴シートに記録（approved列は初期値FALSE）
+   → 担当者が内容を確認し、approved列をTRUEに変更（承認）
+   → 次回のツールB定期実行時に approved=TRUE かつ未反映の行を自動検出
+   → ツールA'を店舗X指定で自動起動
+      （<span class="ic">&lt;!-- shop-info-block:store_id=X --&gt;</span> の目印コメントで対象記事を検索）
+   → WordPress REST APIで該当ブロックのみ更新
+   → 変更履歴シートの reflected_to_articles を TRUE に更新</div>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div>WordPressへの実更新を伴うため、<strong>担当者の承認を必須</strong>とし完全自動化はしません。すぐに反映したい場合は、担当者がツールA'を対象店舗指定で手動実行することも可能です。</div>
+        </div>
+      </div>
     </section>
 
     <!-- ═══ テスト方針 ═══ -->
     <section class="section" id="test">
       <div class="section-header">
-        <div class="step-circle" style="background:#16a34a;">16</div>
+        <div class="step-circle" style="background:#16a34a;">15</div>
         <div>
           <h2>テスト方針</h2>
-          <div class="sub">全45ケース</div>
+          <div class="sub">全43ケース</div>
         </div>
       </div>
       <div class="card">
@@ -745,9 +692,8 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
           <thead><tr><th>対象</th><th>件数</th><th>主な観点</th></tr></thead>
           <tbody>
             <tr><td>ツールA</td><td><span class="badge b-blue">16ケース</span></td><td>新規登録・重複更新・クーポンなし店舗・URL不正・API異常・<strong>公式HPフォールバック</strong>（補完成功/不要/URL未登録/リンク切れ/抽出失敗）</td></tr>
-            <tr><td>ツールA'</td><td><span class="badge b-blue">11ケース</span></td><td>table/タブ/div各パターン・ドライラン・要確認判定・更新競合</td></tr>
-            <tr><td>ツールB</td><td><span class="badge b-blue">9ケース</span></td><td>差分検知・表記揺れ誤検知防止・閉店検知・API異常</td></tr>
-            <tr><td>Slack連携</td><td><span class="badge b-blue">9ケース</span></td><td>権限チェック・即時応答・結果通知・Socket Mode切断対応</td></tr>
+            <tr><td>ツールA'</td><td><span class="badge b-blue">15ケース</span></td><td>table/タブ/div各パターン・ドライラン・要確認判定・更新競合・<strong>差分店舗のみ反映モード</strong></td></tr>
+            <tr><td>ツールB</td><td><span class="badge b-blue">12ケース</span></td><td>差分検知・表記揺れ誤検知防止・閉店検知・API異常・<strong>承認済み差分の自動反映</strong></td></tr>
           </tbody>
         </table>
         <p style="margin-top:10px;">詳細は <a href="./設計書.md#7-テスト仕様書">設計書.md 7章</a> を参照してください。</p>
@@ -757,7 +703,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
     <!-- ═══ ディレクトリ設計 ═══ -->
     <section class="section" id="dir">
       <div class="section-header">
-        <div class="step-circle">17</div>
+        <div class="step-circle">16</div>
         <div>
           <h2>ディレクトリ設計</h2>
           <div class="sub">モノレポ構成</div>
@@ -771,8 +717,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
 ├── apps/
 │   ├── tool-a/           # 店舗マスタ作成CLI（公式HPフォールバック含む）
 │   ├── tool-a-prime/     # 店舗情報自動反映CLI
-│   ├── tool-b/           # 差分検知CLI
-│   └── slack-bot/        # Slackスラッシュコマンド起動・結果通知
+│   └── tool-b/           # 差分検知CLI + 承認済み差分の自動反映
 ├── config/                # 既定値(機密情報は含まない)
 ├── logs/  reports/        # .gitignore対象
 ├── .env.example
@@ -817,9 +762,9 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
       </div>
 
       <div class="trouble">
-        <div class="trouble-q"><span class="qi">Q</span>Slackがないと使えませんか？</div>
+        <div class="trouble-q"><span class="qi">Q</span>差分が見つかったとき、どうやって記事に反映すればいいですか？</div>
         <div class="trouble-a">
-          <p>いいえ。Slackはあくまで起動・通知の利便性向上のためのオプションで、CLIから直接ツールを実行することも常に可能です。Slack Botが停止していても運用に支障はありません。</p>
+          <p>変更履歴シートを確認し、内容に問題なければ<strong>approved列（チェックボックス）をTRUEにする</strong>だけです。実際の記事反映は、次回のツールB定期実行時に自動的に行われます。すぐに反映したい場合は、担当者がツールA'を対象店舗指定で手動実行することも可能です。Botや常時稼働のサーバーは不要で、スプレッドシートの操作だけで完結します。</p>
         </div>
       </div>
     </section>
