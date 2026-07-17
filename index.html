@@ -518,12 +518,16 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
             <tr><td>店舗マスタ</td><td>店舗情報の正本(1店舗1行)</td><td>store_id / hpb_url / official_site_url / business_hours / info_source_fields など全23列</td></tr>
             <tr><td>変更履歴</td><td>ツールBが検知した差分の履歴(追記のみ)</td><td>detected_at / store_id / field / old_value / new_value / reflected_to_articles</td></tr>
             <tr><td>ログ</td><td>各ツールの実行ログ</td><td>run_at / tool / success_count / fail_count / diff_count / triggered_by</td></tr>
-            <tr><td>設定</td><td>各ツールの動作パラメータ</td><td>SCRAPE_INTERVAL_MS / RETRY_MAX / MATCH_CONFIDENCE_THRESHOLD / SLACK_ALLOWED_CHANNEL_IDS</td></tr>
+            <tr><td>設定</td><td>各ツールの動作パラメータ</td><td>SCRAPE_INTERVAL_MS / RETRY_MAX / MATCH_CONFIDENCE_THRESHOLD</td></tr>
           </tbody>
         </table>
         <div class="callout note">
           <span class="callout-icon">📝</span>
           <div><span class="ic">official_site_url</span>＝店舗の公式HP（任意項目）。<span class="ic">info_source_fields</span>＝HPBに情報がなく公式HPで補完した項目のみを記録（記載のない項目はすべてHPB由来）。</div>
+        </div>
+        <div class="callout info">
+          <span class="callout-icon">ℹ️</span>
+          <div><strong>見出しの表記:</strong> 各シートの見出しは2行構成です。1行目は担当者が見てすぐ分かる<strong>日本語表示名</strong>（太字・固定表示）、2行目はツールが参照する<strong>英語キー</strong>（小さめのグレー表示）です。日本語見出しを変更してもツールの動作には影響しません。</div>
         </div>
       </div>
     </section>
