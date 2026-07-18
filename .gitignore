@@ -3,3 +3,4 @@ node_modules/
 logs/
 reports/
 *.log
+tools/store-list-extraction/
