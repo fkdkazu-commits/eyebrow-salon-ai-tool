@@ -205,7 +205,7 @@
     <a class="nav-item" href="#dir"><span class="nav-badge">16</span> ディレクトリ設計</a>
 
     <div class="nav-group">運用ルール</div>
-    <a class="nav-item" href="#fieldrules"><span class="nav-badge">17</span> 店舗情報 更新ルール一覧</a>
+    <a class="nav-item" href="#fieldrules"><span class="nav-badge">17</span> 記事への反映ルール一覧</a>
 
     <div class="nav-group">よくある質問</div>
     <a class="nav-item" href="#faq"><span class="nav-badge">?</span> Q&A</a>
@@ -742,109 +742,97 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
       <div class="section-header">
         <div class="step-circle" style="background:#059669;">17</div>
         <div>
-          <h2>店舗情報 更新ルール一覧</h2>
-          <div class="sub">記事に掲載する各項目が、どこから・どう決まるか</div>
+          <h2>記事への反映ルール一覧</h2>
+          <div class="sub">記事の各タブ・各項目が、自動更新の対象かどうか</div>
         </div>
       </div>
 
       <div class="callout info">
         <span class="callout-icon">ℹ️</span>
-        <div>このシステムが店舗ごとの情報を自動チェックする際、各項目をどこから取得し、どう判断しているかをまとめたものです。「情報源の優先順位」（<a href="#datasource" style="color:inherit;text-decoration:underline;">6章</a>）の基本方針を、実際に運用している項目ごとの挙動に落とし込んだ内容になります。</div>
+        <div>クライアント確認済みのサマリー表にもとづき、記事の各タブ（①基本情報〜⑦口コミ）に掲載されている項目ごとに、システムによる自動更新の対象かどうかをまとめたものです。対象項目は<a href="#datasource" style="color:inherit;text-decoration:underline;">6章</a>の方針（ホットペッパービューティー優先、記載が無い場合のみ公式HPで補完）で値を決定します。</div>
       </div>
 
       <div class="card">
-        <h3>①そもそも変更しない項目</h3>
-        <p>店舗を発見した最初の段階で確定させ、以降のチェックでは書き換えない項目です。</p>
+        <h3>①基本情報タブ</h3>
         <table class="tbl">
-          <thead><tr><th>項目</th><th>理由</th></tr></thead>
+          <thead><tr><th>項目</th><th>自動更新</th><th>備考</th></tr></thead>
           <tbody>
-            <tr><td>店舗名</td><td>ホットペッパービューティー上の表記はSEO対策で本来の店名と異なる場合があるため、情報源として使わず、発見時に確定した表記を維持します</td></tr>
-            <tr><td>住所</td><td>発見時に確定した内容を維持します</td></tr>
-            <tr><td>予約ページのURL（ホットペッパービューティー）</td><td>同上</td></tr>
+            <tr><td>店舗名</td><td>対象外</td><td>ホットペッパービューティー上の表記はSEO対策で本来の店名と異なることが多いため、情報源として使わない</td></tr>
+            <tr><td>おすすめ度</td><td>対象外</td><td>眉毛サロンナビ独自の評価スコアのため</td></tr>
+            <tr><td>料金（初回・通常）</td><td>対象</td><td>-</td></tr>
+            <tr><td>営業時間</td><td>対象</td><td>-</td></tr>
+            <tr><td>住所</td><td>対象</td><td>-</td></tr>
+            <tr><td>予約ページ（公式）</td><td>対象</td><td>-</td></tr>
+            <tr><td>詳細サイト（公式HP）</td><td>対象</td><td>-</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="card">
-        <h3>②毎回チェックして更新する項目</h3>
-        <p>ホットペッパービューティーを最優先の情報源とし、記載が無い場合のみ各店舗の公式サイトを確認します（<a href="#datasource" style="color:inherit;text-decoration:underline;">6章</a>の方針どおり）。どちらにも記載が見つからない場合は、空欄のまま放置せず「<span class="ic">–</span>（データなし）」と明記し、「未確認」とは区別します。</p>
+        <h3>②詳細情報タブ</h3>
         <table class="tbl">
-          <thead><tr><th>項目</th><th>備考</th></tr></thead>
+          <thead><tr><th>項目</th><th>自動更新</th><th>備考</th></tr></thead>
           <tbody>
-            <tr><td>公式サイトのURL</td><td>発見時に登録された内容をそのまま反映</td></tr>
-            <tr><td>料金（初回・通常）</td><td>ホットペッパービューティーの料金表示、または公式サイトの記載内容から判断</td></tr>
-            <tr><td>営業時間</td><td rowspan="7">同上（ホットペッパービューティー優先 → 公式サイトで補完 → どちらにも無ければ「データなし」）</td></tr>
-            <tr><td>アクセス</td></tr>
-            <tr><td>定休日</td></tr>
-            <tr><td>電話番号</td></tr>
-            <tr><td>支払い方法</td></tr>
-            <tr><td>駐車場の有無</td></tr>
-            <tr><td>学割の有無</td></tr>
-            <tr><td>人気メニュー</td></tr>
-            <tr><td>その他の店舗情報</td></tr>
-            <tr><td>全国の店舗数</td><td>公式サイトの記載から判断。無理な推測はせず、記載が見当たらなければ「データなし」</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>③店舗の特徴に関する項目</h3>
-        <p>眉毛の施術メニュー内容から判定します。判断がつかない場合は無理に○・×を付けず空欄のままにします（憶測で決めないための方針です）。</p>
-        <table class="tbl">
-          <thead><tr><th>項目</th><th>判定内容</th></tr></thead>
-          <tbody>
-            <tr><td>眉毛以外のメニューがあるか</td><td>眉毛メニューが1件も確認できない場合のみ「データなし」扱い、それ以外は「あり」と表示</td></tr>
-            <tr><td>眉毛パーマ／HBLの取り扱い</td><td>施術メニューの記載内容から判断</td></tr>
-            <tr><td>眉毛カラーの取り扱い</td><td>同上</td></tr>
-            <tr><td>眉毛メニュー一覧（③料金表用）</td><td>「眉」に関連するメニューのみを対象に、新しいメニューを優先して最大6件まで表示</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>④メンズ利用（2026年8月確定の新ルール）</h3>
-        <p>この項目だけは、店舗ページ本文の記載内容ではなく、<strong>どの記事に掲載されているか</strong>で判定する方式に変更しました。以下の優先順位で決まります。</p>
-        <table class="tbl">
-          <thead><tr><th>優先度</th><th>条件</th><th>表示内容</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>店舗名に「メンズ眉毛サロン」「メンズ専門」などの表記が含まれている</td><td><strong>◯（メンズ専門）</strong></td></tr>
-            <tr><td>2</td><td>掲載されている記事が「メンズ向け」の記事である（記事のURLに"mens"が含まれる）</td><td><strong>◯</strong></td></tr>
-            <tr><td>3</td><td>上記いずれにも当てはまらない</td><td><strong>–（データなし）</strong>。この場合、記事側に元々書かれていた内容があればそれを維持し、上書きはしません</td></tr>
+            <tr><td>アクセス</td><td>対象</td><td>-</td></tr>
+            <tr><td>定休日</td><td>対象</td><td>-</td></tr>
+            <tr><td>電話番号</td><td>対象</td><td>-</td></tr>
+            <tr><td>支払い方法</td><td>対象</td><td>-</td></tr>
+            <tr><td>眉毛以外のメニュー</td><td>対象</td><td>-</td></tr>
+            <tr><td>メンズの利用</td><td>対象</td><td>下記「メンズの利用の判定ルール」参照</td></tr>
+            <tr><td>学割</td><td>対象</td><td>-</td></tr>
+            <tr><td>眉毛パーマ or HBL</td><td>対象</td><td>旧名称「ハリウッドブロウリフト（眉パーマ）」から変更。HBLは眉毛パーマとは別物（正しくは眉癖改善）のため名称を整理した</td></tr>
+            <tr><td>眉毛カラー</td><td>対象</td><td>-</td></tr>
           </tbody>
         </table>
         <div class="callout warn">
-          <span class="callout-icon">⚠️</span>
-          <div>1つの店舗が「メンズ向け記事」と「一般向け記事」の両方に掲載されるケースもあり得ます。その場合、一般向け記事側では上記3の通り記事の既存内容を尊重するため、記事ごとに表示が異なることがあります（これは意図した挙動です）。</div>
+          <span class="callout-icon">🗑️</span>
+          <div><strong>検討の結果、項目自体を削除したもの：</strong>「地域ごとの店舗数」（カウントの精度に課題があるため）、「施術時間」（記載の精度に課題があるため）、「個室」（判別が難しいため）。これらは記事側にも表示しません。</div>
         </div>
       </div>
 
       <div class="card">
-        <h3>⑤評価・口コミ</h3>
+        <h3>メンズの利用の判定ルール</h3>
+        <p>この項目のみ、店舗ページの記載内容ではなく、<strong>掲載されている記事の側</strong>で判定します。</p>
         <table class="tbl">
-          <thead><tr><th>項目</th><th>取得方法・注意点</th></tr></thead>
+          <thead><tr><th>優先度</th><th>条件</th><th>表示内容</th></tr></thead>
           <tbody>
-            <tr><td>ホットペッパービューティーの評価・口コミ件数</td><td>店舗ページに表示されている数値をそのまま取得。表示が無ければ「データなし」</td></tr>
-            <tr><td>Googleマップの評価・口コミ件数</td><td>店舗名・住所でGoogleマップを検索して取得。取得に失敗した場合は既存の数値を維持し、目視確認が必要な項目として色付けでマーキングします</td></tr>
-            <tr><td>Googleマップの口コミ件数（表示が無い場合）</td><td>口コミの少ない店舗ではGoogleマップ側が件数自体を表示しないことが多く、その場合は「0件」ではなく「不明」として扱い、既存の数値を上書きしません</td></tr>
-            <tr><td>複数店舗を展開しているブランドの評価</td><td>住所に支店ごとの表記が複数ある店舗のみ、支店ごとに評価・口コミ件数を個別取得し、記事の「客観的な評価」欄に一覧で表示します</td></tr>
+            <tr><td>1</td><td>店舗名に「メンズ眉毛サロン」「メンズ専門」などが含まれる</td><td><strong>◯（メンズ専門）</strong></td></tr>
+            <tr><td>2</td><td>掲載記事のURLに "mens" が含まれる</td><td><strong>◯</strong></td></tr>
+            <tr><td>3</td><td>上記いずれにも該当しない</td><td><strong>–</strong>（この場合、記事に元々書かれていた内容があればそのまま維持）</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="card">
-        <h3>⑥運用管理用の情報</h3>
+        <h3>③料金表タブ</h3>
+        <p>眉毛に関するメニューのみを対象に、メニュー名と金額を掲載します（眉毛以外の施術は対象外）。</p>
+      </div>
+
+      <div class="card">
+        <h3>⑥客観的な評価タブ</h3>
+        <p>Googleマップとホットペッパービューティー、それぞれの評価点・口コミ件数を店舗ごとに掲載します。複数の支店を展開しているブランドは、支店ごとに一覧表示します。</p>
+      </div>
+
+      <div class="card">
+        <h3>①・⑥タブ共通：基準日の表記</h3>
+        <p>「※2026年5月1日時点」のような基準日キャプションは、更新のたびに実行日の日付へ自動で書き換えます。</p>
+      </div>
+
+      <div class="card">
+        <h3>自動更新の対象外（媒体側で作成・管理する項目）</h3>
         <table class="tbl">
-          <thead><tr><th>項目</th><th>内容</th></tr></thead>
+          <thead><tr><th>タブ</th><th>項目</th><th>理由</th></tr></thead>
           <tbody>
-            <tr><td>最終確認日時</td><td>このシステムがその店舗を最後にチェックした日時</td></tr>
-            <tr><td>ステータス</td><td>通常は「稼働中」。店舗ページが消失している（閉店の可能性がある）場合は自動でマーキングされますが、実際に閉店したかどうかの最終判断は人が目視で行います</td></tr>
+            <tr><td>④特徴</td><td>紹介文（箇条書き）</td><td>記事作者によるオリジナルの紹介文のため</td></tr>
+            <tr><td>⑤サロンナビ独自評価</td><td>口コミ・評判／通いやすさ／料金／独自定性評価／平均評価</td><td>眉毛サロンナビ独自の評価のため</td></tr>
+            <tr><td>⑦口コミ</td><td>レビュー（画像付きコメント）</td><td>媒体が独自にキュレーションした口コミ・画像のため。将来的には評判の良い口コミを自動で最新化できるとよい、という構想はある</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="callout info">
         <span class="callout-icon">✅</span>
-        <div><strong>共通の安全策：</strong>店舗ページ自体の取得に失敗した場合は、その店舗の情報を一切書き換えず、既存の内容をそのまま維持します。「情報が取得できなかったこと」と「調べた結果、情報が無かったこと」は明確に区別して記録するため、意図せず空欄のまま放置される項目が出ないようにしています。</div>
+        <div><strong>共通の安全策：</strong>ホットペッパービューティー・公式サイトのどちらにも記載が見つからない項目は、空欄のまま放置せず「<span class="ic">–</span>（データなし）」と明記します。また、店舗ページ自体の取得に失敗した場合は、その店舗の情報を一切書き換えず既存の内容をそのまま維持します。</div>
       </div>
     </section>
 
