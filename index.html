@@ -518,7 +518,7 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
         <table class="tbl">
           <thead><tr><th>シート</th><th>用途</th><th>主なカラム例</th></tr></thead>
           <tbody>
-            <tr><td>店舗マスタ</td><td>店舗情報の正本(1店舗1行)</td><td>store_id / hpb_url / official_site_url / business_hours / info_source_fields など全23列</td></tr>
+            <tr><td>店舗マスタ</td><td>店舗情報の正本(1店舗1行)</td><td>store_id / store_name / price / business_hours / address など<strong>全27列</strong>（下表参照）</td></tr>
             <tr><td>変更履歴</td><td>ツールBが検知した差分の履歴(追記のみ)</td><td>detected_at / store_id / field / old_value / new_value / reflected_to_articles</td></tr>
             <tr><td>ログ</td><td>各ツールの実行ログ</td><td>run_at / tool / success_count / fail_count / diff_count / triggered_by</td></tr>
             <tr><td>設定</td><td>各ツールの動作パラメータ</td><td>SCRAPE_INTERVAL_MS / RETRY_MAX / MATCH_CONFIDENCE_THRESHOLD</td></tr>
@@ -527,6 +527,47 @@ HPB(または公式HP)を巡回 → 店舗マスタと差分検知
         <div class="callout note">
           <span class="callout-icon">📝</span>
           <div><span class="ic">official_site_url</span>＝店舗の公式HP（任意項目）。<span class="ic">info_source_fields</span>＝HPBに情報がなく公式HPで補完した項目のみを記録（記載のない項目はすべてHPB由来）。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>店舗マスタの項目定義（全27列）</h3>
+        <p>1行目が表示名、2行目が項目名（英語キー）、3行目以降がデータです。列順は記事のタブ構造（①基本情報／②詳細情報／③料金表／⑥客観的な評価）の並びに合わせています。</p>
+        <table class="tbl">
+          <thead><tr><th>列</th><th>表示名</th><th>項目名</th><th>内容・書式</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td>店舗ID</td><td>store_id</td><td>ホットペッパーの店舗コード、または独自採番（例: <span class="ic">H000716124</span> / <span class="ic">OFC00013</span>）</td></tr>
+            <tr><td>B</td><td>店舗名</td><td>store_name</td><td>記事側の表記を正とする（ホットペッパーの店舗名はSEO対策で不正確なため情報源にしない）</td></tr>
+            <tr><td>C</td><td>料金</td><td>price</td><td>③料金表の眉毛メニューから決定した代表価格（例: <span class="ic">初回：4980</span>）</td></tr>
+            <tr><td>D</td><td>営業時間</td><td>business_hours</td><td>曜日ごとに分かれる場合は集約（例: <span class="ic">【平日】11:00～20:00【土日祝】10:00～19:00</span>）</td></tr>
+            <tr><td>E</td><td>住所</td><td>address</td><td>複数支店は <span class="ic">【支店名】住所</span> を連結して保持</td></tr>
+            <tr><td>F</td><td>ホットペッパーURL</td><td>hpb_url</td><td>予約ページとして記事に表示。掲載終了・無効の場合は「–」</td></tr>
+            <tr><td>G</td><td>公式HP URL</td><td>official_site_url</td><td>公式サイトとして記事に表示</td></tr>
+            <tr><td>H</td><td>アクセス</td><td>access</td><td><strong>「○○駅から徒歩○分」に整形して保持</strong>（判定できない場合は「–」）</td></tr>
+            <tr><td>I</td><td>定休日</td><td>closed_days</td><td>休業日の記載のみ（宣伝文・キーワード羅列は除去）</td></tr>
+            <tr><td>J</td><td>電話番号</td><td>phone_number</td><td>ホットペッパーの電話番号ページ、または公式サイトから取得</td></tr>
+            <tr><td>K</td><td>支払方法</td><td>payment_methods</td><td>「／」区切り</td></tr>
+            <tr><td>L</td><td>眉毛以外のメニュー</td><td>other_treatment_menu</td><td><span class="ic">○（他メニューあり）</span> / <span class="ic">–</span></td></tr>
+            <tr><td>M</td><td>メンズの利用</td><td>mens_available</td><td><span class="ic">○（メンズ専門）</span> / <span class="ic">○</span> / <span class="ic">–</span></td></tr>
+            <tr><td>N</td><td>学割</td><td>student_discount</td><td>該当クーポン名と金額</td></tr>
+            <tr><td>O</td><td>眉毛パーマ or HBL</td><td>eyebrow_perm_hbl</td><td><span class="ic">○</span> / <span class="ic">–</span></td></tr>
+            <tr><td>P</td><td>眉毛カラー</td><td>eyebrow_color</td><td><span class="ic">○</span> / <span class="ic">–</span></td></tr>
+            <tr><td>Q</td><td>眉毛メニュー一覧</td><td>eyebrow_menu_list</td><td>JSON形式・最大6件。③料金表に対応</td></tr>
+            <tr><td>R</td><td>口コミ件数</td><td>review_count</td><td>ホットペッパーの口コミ件数</td></tr>
+            <tr><td>S</td><td>評価</td><td>rating</td><td>ホットペッパーの評価</td></tr>
+            <tr><td>T</td><td>Google評価</td><td>google_rating</td><td>Googleマップの評価</td></tr>
+            <tr><td>U</td><td>Googleクチコミ件数</td><td>google_review_count</td><td>Googleマップの口コミ件数</td></tr>
+            <tr><td>V</td><td>情報源</td><td>info_source_fields</td><td>公式HPで補完した項目名（記載のない項目はホットペッパー由来）</td></tr>
+            <tr><td>W</td><td>最終確認日時</td><td>last_checked_at</td><td>最後に確認した日時</td></tr>
+            <tr><td>X</td><td>最終更新日時</td><td>last_updated_at</td><td>実際に値が変わった直近の日時</td></tr>
+            <tr><td>Y</td><td>ステータス</td><td>status</td><td><span class="ic">active</span> / <span class="ic">closed</span> / <span class="ic">error</span> / <span class="ic">hpb_expired</span></td></tr>
+            <tr><td>Z</td><td>支店別評価</td><td>branch_reviews</td><td>JSON形式。支店ごとの評価・口コミ件数・URL（⑥客観的な評価の複数支店表示用）</td></tr>
+            <tr><td>AA</td><td>クライアント</td><td>is_client</td><td><strong>広告プランの契約店舗に <span class="ic">○</span></strong>。この列が「○」の店舗にはリンクに <span class="ic">nofollow</span> を付けない</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warn">
+          <span class="callout-icon">🗑️</span>
+          <div><strong>2026年8月に整理した項目：</strong>「全国店舗数」「駐車場」「個室」「メンズ料金」「人気メニュー」「その他情報」は、記事のどのタブにも反映されないため列ごと削除しました。「初回料金」「通常料金」は<strong>「料金」1列に統合</strong>しています。</div>
         </div>
         <div class="callout info">
           <span class="callout-icon">ℹ️</span>
